@@ -6,6 +6,7 @@ use App\Repository\ProjetRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -21,8 +22,8 @@ use Doctrine\ORM\Mapping as ORM;
  *          "get"={ "security"="is_granted('ROLE_MEMBER')"},
  *          "post"={"security"="is_granted('ROLE_MEMBER')"}
  *     },
- *     normalizationContext={"groups"={"user:read"}},
- *     denormalizationContext={"groups"={"user:write"}},
+ *     normalizationContext={"groups"={"projet:read"}},
+ *     denormalizationContext={"groups"={"projet:write"}},
  * )
  * @ORM\Entity(repositoryClass=ProjetRepository::class)
  */
@@ -32,48 +33,48 @@ class Projet
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"user:read"})
+     * @Groups({"projet:read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=false)
-     * @Groups({"user:read","user:write"})
+     * @Groups({"projet:read","projet:write"})
      */
     private $titre;
 
     /**
      * @ORM\Column(type="date", nullable=false)
-     * @Groups({"user:read","user:write"})
+     * @Groups({"projet:read","projet:write"})
      */
     private $dateDebutProjet;
 
     /**
      * @ORM\Column(type="date", nullable=false)
-     * @Groups({"user:read","user:write"})
+     * @Groups({"projet:read","projet:write"})
      */
     private $dateFinProjet;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Groups({"user:read","user:write"})
+     * @Groups({"projet:read","projet:write"})
      */
     private $description;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=false)
-     * @Groups({"user:read","user:write"})
+     * @Groups({"projet:read","projet:write"})
      */
     private $etat;
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="admin_projets")
-     * @Groups({"user:read","user:write"})
+     * @Groups({"projet:read","projet:write"})
      */
     private $admin;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Tache", mappedBy="projet")
-     * @Groups({"user:read","user:write"})
+     * @Groups({"projet:read","projet:write"})
      */
     private $taches;
 

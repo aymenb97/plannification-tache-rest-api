@@ -5,7 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ModuleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
-
+use Symfony\Component\Serializer\Annotation\Groups;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -21,8 +21,8 @@ use Doctrine\ORM\Mapping as ORM;
  *          "get"={ "security"="is_granted('ROLE_MANAGER')"},
  *          "post"={"security"="is_granted('ROLE_MANAGER')"}
  *     },
- *     normalizationContext={"groups"={"user:read"}},
- *     denormalizationContext={"groups"={"user:write"}},
+ *     normalizationContext={"groups"={"module:read"}},
+ *     denormalizationContext={"groups"={"module:write"}},
  * )
  * @ORM\Entity(repositoryClass=ModuleRepository::class)
  */
@@ -32,16 +32,19 @@ class Module
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"module:read"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"module:read","module:write"})
      */
     private $titreModule;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"module:read","module:write"})
      */
     private $dateDebutModule;
 
@@ -52,6 +55,7 @@ class Module
 
     /**
      * @ORM\OneToMany(targetEntity="App\Entity\Tache", mappedBy="module")
+     * @Groups({"module:read","module:write"})
      */
     private $taches;
 

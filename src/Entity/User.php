@@ -71,7 +71,7 @@ class User implements UserInterface
     private $email;
 
     /**
-     *  @ORM\OneToMany(targetEntity="App\Entity\Tache", mappedBy="user")
+     *  @ORM\OneToMany(targetEntity="App\Entity\Tache", mappedBy="membreEquipe")
      *  @Groups({"user:read","user:write"})
      */
     private $taches;

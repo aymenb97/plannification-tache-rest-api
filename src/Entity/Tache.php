@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\TacheRepository;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ApiResource(
@@ -19,8 +20,8 @@ use ApiPlatform\Core\Annotation\ApiResource;
  *          "get"={ "security"="is_granted('ROLE_MEMBER')"},
  *          "post"={"security"="is_granted('ROLE_MANAGER')"}
  *     },
- *     normalizationContext={"groups"={"user:read"}},
- *     denormalizationContext={"groups"={"user:write"}},
+ *     normalizationContext={"groups"={"tache:read"}},
+ *     denormalizationContext={"groups"={"tache:write"}},
  * )
  * @ORM\Entity(repositoryClass=TacheRepository::class)
  */
@@ -35,36 +36,43 @@ class Tache
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"tache:read","tache:write"})
      */
     private $titreTache;
 
     /**
      * @ORM\Column(type="date")
+     * @Groups({"tache:read","tache:write"})
      */
     private $dateDebutTache;
 
     /**
      * @ORM\Column(type="date")
+     * @Groups({"tache:read","tache:write"})
      */
     private $dateFinTache;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups({"tache:read","tache:write"})
      */
     private $priorite;
 
     /**
      * @ORM\Column(type="string", length=50)
+     * @Groups({"tache:read","tache:write"})
      */
     private $etatTache;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups({"tache:read","tache:write"})
      */
     private $tauxAvancement;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="taches")
+     * @Groups({"tache:read","tache:write"})
      */
     private $membreEquipe;
 
@@ -72,11 +80,15 @@ class Tache
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Projet", inversedBy="taches")
+     * @ORM\Column(type="integer")
+     * @Groups({"user:tache","tache:write"})
      */
     private $projet;
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Module", inversedBy="taches")
+     * @ORM\Column(type="integer")
+     * @Groups({"tache:read","tache:write"})
      */
     private $module;
 
