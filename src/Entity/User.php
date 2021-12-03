@@ -100,6 +100,11 @@ class User implements UserInterface
     private $password;
 
     /**
+     * @ORM\OneToMany(targetEntity=Projet::class, mappedBy="admin")
+     */
+    private $adminProjet;
+
+    /**
      * @Groups({"user:write"})
      * @SerializedName("password")
      */
@@ -107,6 +112,7 @@ class User implements UserInterface
 
     public function __construct()
     {
+        $this->adminProjet= new ArrayCollection();
         $this->taches = new ArrayCollection();
         $this->roles= [];
     }
@@ -229,6 +235,32 @@ class User implements UserInterface
     public function hasRoles(string $roles): bool
     {
         return in_array($roles, $this->roles);
+    }
+    public function getProjets(): Collection
+    {
+        return $this->projets;
+    }
+
+    public function addProjet(Projet $adminProjet): self
+    {
+        if (!$this->adminProjet->contains($adminProjet)) {
+            $this->adminProjet[] = $adminProjet;
+            $adminProjet->setAdmin($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProjet(Projet $adminProjet): self
+    {
+        if ($this->adminProjet->removeElement($adminProjet)) {
+            // set the owning side to null (unless already changed)
+            if ($adminProjet->getAdmin() === $this) {
+                $adminProjet->setAdmin(null);
+            }
+        }
+
+        return $this;
     }
 
     public function getSalt()

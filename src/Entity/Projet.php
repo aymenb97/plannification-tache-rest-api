@@ -67,7 +67,7 @@ class Projet
      */
     private $etat;
     /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="admin_projets")
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="adminProjet")
      * @Groups({"projet:read","projet:write"})
      */
     private $admin;
