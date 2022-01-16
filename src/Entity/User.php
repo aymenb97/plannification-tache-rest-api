@@ -12,18 +12,21 @@ use Symfony\Component\Serializer\Annotation\Ignore;
 use Symfony\Component\Serializer\Annotation\SerializedName;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Validator\Constraints as Assert;
 use ApiPlatform\Core\Annotation\ApiSubresource;
 use Doctrine\Common\Collections\Collection;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
+ * @UniqueEntity("email")
  * @ApiResource(
  *     itemOperations={
  *          "get"={
- *              "security"="is_granted('ROLE_USER')",
+ *              "security"="is_granted('ROLE_ADMIN')",
  *          },
- *          "put"={"security"="is_granted('ROLE_USER')"},
- *          "delete"={"security"="is_granted('ROLE_USER')"}
+ *          "put"={"security"="is_granted('ROLE_ADMIN')"},
+ *          "delete"={"security"="is_granted('ROLE_ADMIN')"}
  *     },
  *     collectionOperations={
  *          "get"={ "security"="is_granted('ROLE_ADMIN')"},
@@ -67,12 +70,14 @@ class User implements UserInterface
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      * @Groups({"user:read","user:write"})
+     * @Assert\Email
      */
     private $email;
 
     /**
      *  @ORM\OneToMany(targetEntity="App\Entity\Tache", mappedBy="membreEquipe")
      *  @Groups({"user:read","user:write"})
+     *
      */
     private $taches;
 
@@ -110,11 +115,14 @@ class User implements UserInterface
      */
     private $plainPassword;
 
+
+
     public function __construct()
     {
         $this->adminProjet= new ArrayCollection();
         $this->taches = new ArrayCollection();
         $this->roles= [];
+        $this->messages = new ArrayCollection();
     }
     public function getId(): ?int
     {
@@ -276,5 +284,35 @@ class User implements UserInterface
     public function __call($name, $arguments)
     {
         // TODO: Implement @method string getUserIdentifier()
+    }
+
+    /**
+     * @return Collection|Message[]
+     */
+    public function getMessages(): Collection
+    {
+        return $this->messages;
+    }
+
+    public function addMessage(Message $message): self
+    {
+        if (!$this->messages->contains($message)) {
+            $this->messages[] = $message;
+            $message->setUser1($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMessage(Message $message): self
+    {
+        if ($this->messages->removeElement($message)) {
+            // set the owning side to null (unless already changed)
+            if ($message->getUser1() === $this) {
+                $message->setUser1(null);
+            }
+        }
+
+        return $this;
     }
 }
