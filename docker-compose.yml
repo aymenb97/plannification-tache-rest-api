@@ -1,44 +1,88 @@
-version: '3'
-
+version: "3.8"
 services:
-###> doctrine/doctrine-bundle ###
-  database:
-    image: postgres:${POSTGRES_VERSION:-13}-alpine
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-app}
-      # You should definitely change the password in production
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ChangeMe}
-      POSTGRES_USER: ${POSTGRES_USER:-symfony}
+  ###> doctrine/doctrine-bundle ###
+  mysql:
+    image: mysql:8
+    ports:
+      - 3306:3306
     volumes:
-      - db-data:/var/lib/postgresql/data:rw
-      # You may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
-      # - ./docker/db/data:/var/lib/postgresql/data:rw
-###< doctrine/doctrine-bundle ###
-
-###> symfony/mercure-bundle ###
-  mercure:
-    image: dunglas/mercure
-    restart: unless-stopped
+      - ./apps/mysql:/var/lib/mysql
     environment:
-      SERVER_NAME: ':80'
-      MERCURE_PUBLISHER_JWT_KEY: '!ChangeMe!'
-      MERCURE_SUBSCRIBER_JWT_KEY: '!ChangeMe!'
-      # Set the URL of your Symfony project (without trailing slash!) as value of the cors_origins directive
-      MERCURE_EXTRA_DIRECTIVES: |
-        cors_origins http://127.0.0.1:8000
-    # Comment the following line to disable the development mode
-    command: /usr/bin/caddy run -config /etc/caddy/Caddyfile.dev
-    volumes:
-      - mercure_data:/data
-      - mercure_config:/config
-###< symfony/mercure-bundle ###
-
-volumes:
-###> doctrine/doctrine-bundle ###
-  db-data:
-###< doctrine/doctrine-bundle ###
-
-###> symfony/mercure-bundle ###
-  mercure_data:
-  mercure_config:
-###< symfony/mercure-bundle ###
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_PASSWORD=symfony
+      - MYSQL_USER=symfony
+      - MYSQL_DATABASE=plannification_taches
+    networks:
+      - app-network
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - 8081:80
+    networks:
+      - app-network
+  nginx:
+    container_name: reverse_proxy
+    image: nginx-ingress
+    networks:
+      - app-network
+    build:
+      context: ./nginx
+      dockerfile: ./Dockerfile
+    ports:
+      - 80:80
+  auth:
+    image: gestion-auth
+    build:
+      context: ./auth
+      dockerfile: ./Dockerfile
+    environment:
+      - DATABASE_URL=mysql://symfony:symfony@mysql:3306/plannification_taches?serverVersion=8.0
+    networks:
+      - app-network
+  user:
+    image: gestion-users
+    build:
+      context: ./users
+      dockerfile: ./Dockerfile
+    environment:
+      - DATABASE_URL=mysql://symfony:symfony@mysql:3306/plannification_taches?serverVersion=8.0
+    networks:
+      - app-network
+  modules:
+    image: gestion-modules
+    build:
+      context: ./modules
+      dockerfile: ./Dockerfile
+    environment:
+      - DATABASE_URL=mysql://symfony:symfony@mysql:3306/plannification_taches?serverVersion=8.0
+    networks:
+      - app-network
+  projets:
+    image: gestion-projets
+    build:
+      context: ./projets
+      dockerfile: ./Dockerfile
+    environment:
+      - DATABASE_URL=mysql://symfony:symfony@mysql:3306/plannification_taches?serverVersion=8.0
+    networks:
+      - app-network
+  taches:
+    image: gestion-taches
+    build:
+      context: ./taches
+      dockerfile: ./Dockerfile
+    environment:
+      - DATABASE_URL=mysql://symfony:symfony@mysql:3306/plannification_taches?serverVersion=8.0
+    networks:
+      - app-network
+    deploy:
+      mode: replicated
+      replicas: 5
+networks:
+  app-network:

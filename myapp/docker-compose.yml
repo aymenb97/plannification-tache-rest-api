@@ -1,0 +1,22 @@
+version: "3.8"
+services:
+  ###> doctrine/doctrine-bundle ###
+  app:
+    image: fpm-cgi
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - app-network
+  nginx:
+    image: nginx-cgi
+    build:
+      context: .
+      dockerfile: nginx.dockerfile
+    restart: always
+    ports:
+      - 80:80
+    networks:
+      - app-network
+networks:
+  app-network:
